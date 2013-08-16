@@ -13,9 +13,9 @@
 .\" 
 .\" THE SOFTWARE IS PROVIDED 'AS IS'.  USE ENTIRELY AT YOUR OWN RISK.
 .\" 
-.\" Last edited: 2012-05-17 15:38:34 by piumarta on emilia
+.\" Last edited: 2013-09-09 14:58:44 by piumarta on emilia
 .\"
-.TH PEG 1 "April 2012" "Version 0.1"
+.TH PEG 1 "September 2013" "Version 0.1"
 .SH NAME
 peg, leg \- parser generators
 .SH SYNOPSIS
@@ -1019,6 +1019,43 @@ pattern following the recursion into a repeatable suffix.
     |   LPAREN param-type-list? RPAREN
 
 .fi
+.SH CAVEATS
+A parser that accepts empty input will
+.I always
+succeed.  Consider the following example, not atypical of a first
+attempt to write a PEG-based parser:
+.nf
+
+    Program = Expression*
+    Expression = "whatever"
+    %%
+    int main() {
+      while (yyparse())
+        puts("success!");
+      return 0;
+    }
+
+.fi
+This program loops forever, no matter what (if any) input is provided
+on stdin.  Many fixes are possible, the easiest being to insist that
+the parser always consumes some non-empty input.  Changing the first
+line to
+.nf
+
+    Program = Expression+
+
+.fi
+accomplishes this.  If the parser is expected to consume the entire
+input, then explicitly requiring the end-of-file is also highly
+recommended:
+.nf
+
+    Program = Expression+ !.
+
+.fi
+This works because the parser will only fail to match ("!" predicate)
+any character at all ("." expression) when it attempts to read beyond
+the end of the input.
 .SH BUGS
 You have to type 'man peg' to read the manual page for
 .IR leg (1).
@@ -1041,7 +1078,7 @@ Several commonly-used
 .IR lex (1)
 features (yywrap(), yyin, etc.) are completely absent.
 .PP
-The generated parser foes not contain '#line' directives to direct C
+The generated parser does not contain '#line' directives to direct C
 compiler errors back to the grammar description when appropriate.
 .SH SEE ALSO
 D. Val Schorre,
