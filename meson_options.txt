@@ -1,0 +1,5 @@
+option('emacs',
+  type: 'boolean',
+  value: false,
+  description: 'Install Emacs Lisp mode for leg (leg-mode.el)'
+)
